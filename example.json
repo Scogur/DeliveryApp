@@ -1,0 +1,62 @@
+[
+    {
+        "id": "ac4eb1af-d1f7-4cd3-b8cc-fb3c0956732c",
+        "weight": 2,
+        "district": "d1",
+        "Date": "2024-10-25 17:06:16"
+    },
+    {
+        "id": "07ad4f66-6b97-476a-a9ab-8c5643722210",
+        "weight": 7,
+        "district": "d1",
+        "Date": "2024-10-25 17:07:16"
+    },
+    {
+        "id": "466c8c28-fd0e-46c0-9b11-f84f6583dcf6",
+        "weight": 6,
+        "district": "d2",
+        "Date": "2024-10-25 17:08:16"
+    },
+    {
+        "id": "c705a68b-2c2e-40e4-b320-c63573a2efd6",
+        "weight": 9,
+        "district": "d3",
+        "Date": "2024-10-25 17:09:16"
+    },
+    {
+        "id": "d607b045-0fe4-4a51-aa83-2e511564a733",
+        "weight": 8,
+        "district": "d2",
+        "Date": "2024-10-25 17:10:16"
+    },
+    {
+        "id": "55931449-5d46-40d5-bed0-50b3feed5386",
+        "weight": 4,
+        "district": "d1",
+        "Date": "2024-10-25 17:11:16"
+    },
+    {
+        "id": "6d4f77b8-24bc-4efd-8bb5-6d8450171d1c",
+        "weight": 6,
+        "district": "d3",
+        "Date": "2024-10-25 17:12:16"
+    },
+    {
+        "id": "ab242b0a-e978-45c3-80cb-90b27fb59e2e",
+        "weight": 1,
+        "district": "d2",
+        "Date": "2024-10-25 17:13:16"
+    },
+    {
+        "id": "8d369dd3-55c4-4f5b-a605-e9f55288b863",
+        "weight": 2,
+        "district": "d2",
+        "Date": "2024-10-25 17:14:16"
+    },
+    {
+        "id": "d33d7c68-e36b-4398-b7f0-ca5ed6eb15bd",
+        "weight": 9,
+        "district": "d2",
+        "Date": "2024-10-25 17:15:16"
+    }
+]
