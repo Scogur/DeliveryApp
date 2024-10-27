@@ -10,52 +10,103 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Starting");
+        Logger logger = new();
+        logger.Log("============Starting new log============");
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
         builder.Configuration.Sources.Clear();
 
-        Generator.GenerateJson(1000);
+        // Generate JSON for testing
+        //Generator.GenerateJson(100000);
+
 
         builder.Configuration
             .AddXmlFile("config.xml", optional: true, reloadOnChange: true);
         Parser parser = new();
+        parser.logger = logger;
         if (args is { Length: > 0 })
         {
             builder.Configuration.AddCommandLine(args);
             using IHost host = builder.Build();
         }
         string? path = builder.Configuration["key:_path"];
-        if (path == null) Console.WriteLine("Path is empty or not found");
+        if (path == null) logger.Log("Path is empty or not found");
         else parser.path = path;
         Order[] orders = parser.Parse();
-        Console.WriteLine("Orders found: " + orders.Length);
+        logger.Log("Orders found: " + orders.Length);
         string? district = builder.Configuration["key:_district"];
         parser.district = district;
         string? firstDeliveryDateTime = builder.Configuration["key:_firstDeliveryDateTime"];
         parser.firstDeliveryDateTime = firstDeliveryDateTime;
+
+        string? logFile = builder.Configuration["key:_deliveryLog"];
+        if (string.IsNullOrWhiteSpace(logFile))
+        {
+            logFile = "./log.txt";
+        }
+        logger.logFile = logFile;
+        logger.Log("Logs are saved to " + logFile);
+
+        string? outFile = builder.Configuration["key:_deliveryOrder"];
+        if (string.IsNullOrWhiteSpace(outFile))
+        {
+            outFile = "./out.json";
+        }
         parser.Validator(args);
-        
+
 
         Order[] result = parser.Sort(orders);
 
         if (result.Length > 0)
         {
-            Console.WriteLine("Filtered found: " + result.Length);
-            Console.WriteLine(JsonSerializer.Serialize(result));
-        } else Console.WriteLine("No results found");
+            logger.Log("Filtered found: " + result.Length);
+            logger.Log("Saving result to " + outFile);
+            SaveToFile(outFile, result);
+        }
+        else logger.Log("No results found");
+    }
+
+    static void SaveToFile(string filename, Object content)
+    {
+        using StreamWriter file = File.CreateText(filename);
+        file.WriteLine(JsonSerializer.Serialize(content));
+    }
+}
+
+public class Logger
+{
+    public Queue<string> log = new();
+    public string? logFile = null;
+
+    public void Log(string message)
+    {
+        message = "[" + DateTime.Now.ToString() + "]" + message;
+        log.Enqueue(message);
+        Console.WriteLine(message);
+        SaveToFile();
+    }
+    private void SaveToFile()
+    {
+        if (!string.IsNullOrWhiteSpace(logFile))
+        {
+            using StreamWriter file = File.AppendText(logFile);
+            while (log.Count>0){
+                file.WriteLine(log.Dequeue());
+            }
+        }
     }
 }
 
 public class Parser
 {
+    public Logger logger;
     public string path = "";
     public string? district = "";
     public Guid district_id;
     public string? firstDeliveryDateTime;
     public Order[] Parse()
     {
-        Console.WriteLine("Parsing " + path);
+        logger.Log("Parsing " + path);
         string jsonString = File.ReadAllText(this.path);
         Order[]? orders = JsonSerializer.Deserialize<Order[]>(jsonString);
         return orders ?? throw new InvalidOperationException("Invalid JSON format");
@@ -64,7 +115,7 @@ public class Parser
     public bool Validator(string[] args)
     {
         bool allFine = true;
-        Console.WriteLine("Found parameters:");
+        logger.Log("Found cli parameters:");
         foreach (var arg in args)
         {
             if (arg.Equals("_path"))
@@ -74,34 +125,30 @@ public class Parser
             if (arg.Equals("_district"))
             {
                 this.district = args[Array.IndexOf(args, arg) + 1];
-                Console.WriteLine("_district: " + this.district);
+                logger.Log("_district: " + this.district);
             }
             if (arg.Equals("_firstDeliveryDateTime"))
             {
                 this.firstDeliveryDateTime = args[Array.IndexOf(args, arg) + 1];
-                Console.WriteLine("_firstDeliveryDateTime: " + this.firstDeliveryDateTime);
+                logger.Log("_firstDeliveryDateTime: " + this.firstDeliveryDateTime);
             }
         }
         if (this.path.Equals(""))
         {
-            Console.WriteLine("Path is empty or not found");
+            logger.Log("Path is empty or not found");
             allFine = false;
         }
         return allFine;
     }
 
-    public static Guid? DistrictGuid(string name)
-    {
-        // return Districts.DistrictsGuids[name];
-        return null;
-    }
-
     public Order[] Sort(Order[] orders)
     {
-        if (string.IsNullOrEmpty(this.firstDeliveryDateTime)){
+        if (string.IsNullOrWhiteSpace(this.firstDeliveryDateTime))
+        {
             return SortDistrict(this.district, orders);
         }
-        else {
+        else
+        {
             return SortDistrict(this.district, SortDate(DateTime.Parse(this.firstDeliveryDateTime), orders));
         }
     }
@@ -150,13 +197,19 @@ public class Districts
 
 
 
+
+
+//==================================
+//Generator class purely is for testing purposes
+//It contains GenerateJson method that generates example file with specific amount of items
+//==================================
 public static class Generator
 {
-    public static void GenerateJson(int lenght)
+    public static void GenerateJson(int length)
     {
         string docPath = "./example.json";
-        Order[] orders = new Order[lenght];
-        for (int i = 0; i < lenght; i++)
+        Order[] orders = new Order[length];
+        for (int i = 0; i < length; i++)
         {
             orders[i] = new Order()
             {
@@ -168,7 +221,6 @@ public static class Generator
                 Date = DateTime.Now.AddMinutes(i).ToString("yyyy'-'MM'-'dd' 'HH':'mm':'ss"),
             };
         }
-
         using StreamWriter file = File.CreateText(docPath);
         file.WriteLine(JsonSerializer.Serialize(orders));
     }

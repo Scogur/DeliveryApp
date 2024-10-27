@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <key name="_path">./example.json</key>
+  <key name="_district">d1</key>
+  <key name="_firstDeliveryDateTime">2024-10-27 19:03:40</key>
+  <key name="_deliveryLog">./log.txt</key>
+  <key name="_deliveryOrder">./result.json</key>
+</configuration>
